@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:number_slide_animation/number_slide_animation.dart';
 
@@ -26,22 +28,50 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Example extends StatelessWidget {
+class Example extends StatefulWidget {
+  @override
+  _ExampleState createState() => _ExampleState();
+}
+
+class _ExampleState extends State<Example> {
+  final random = Random();
+  int number;
+
+  @override
+  void initState() {
+    super.initState();
+
+    generateNumber();
+  }
+
+  void generateNumber() {
+    setState(() {
+      number = random.nextInt(1e8.toInt());
+      print(number);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Simple Example"),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => generateNumber(),
+        child: Icon(Icons.refresh),
+      ),
       body: Container(
-          child: Center(
-        child: NumberSlideAnimation(
-          number: "12345678987654321",
-          duration: const Duration(seconds: 2),
-          curve: Curves.decelerate,
-          textStyle: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+        child: Center(
+          child: NumberSlideAnimation(
+            number: "$number".padLeft(8),
+            duration: const Duration(seconds: 2),
+            curve: Curves.decelerate,
+            textStyle: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            animateOnUpdate: true,
+          ),
         ),
-      )),
+      ),
     );
   }
 }

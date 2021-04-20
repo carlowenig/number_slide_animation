@@ -30,11 +30,17 @@ class NumberSlideAnimation extends StatefulWidget {
   /// defaults to: Curves.easeIn
   final Curve curve;
 
+  /// Whether the widget should play the animation when the number was updated.
+  ///
+  /// defaults to: false
+  final bool animateOnUpdate;
+
   NumberSlideAnimation({
     required this.number,
     this.textStyle = const TextStyle(fontSize: 16.0),
     this.duration = const Duration(milliseconds: 1500),
     this.curve = Curves.easeIn,
+    this.animateOnUpdate = false,
   }) : assert(int.tryParse(number) != null);
 
   @override
@@ -73,10 +79,11 @@ class _NumberSlideAnimationState extends State<NumberSlideAnimation> {
       key: _rowKey,
       children: List.generate(widget.number.length, (position) {
         return NumberCol(
-          animateTo: int.parse(widget.number[position]),
+          animateTo: int.tryParse(widget.number[position]),
           textStyle: widget.textStyle,
           duration: widget.duration,
           curve: widget.curve,
+          animateOnUpdate: widget.animateOnUpdate,
         );
       }),
     );

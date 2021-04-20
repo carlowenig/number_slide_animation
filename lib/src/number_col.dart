@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// via a [ScrollController] the position will be animated to the requested number
 class NumberCol extends StatefulWidget {
   /// The number the col should animate to
-  final int animateTo;
+  final int? animateTo;
 
   /// The [TextStyle] of the number
   final TextStyle textStyle;
@@ -13,12 +13,16 @@ class NumberCol extends StatefulWidget {
   // The curve that is used during the animation
   final Curve curve;
 
+  /// Whether the widget should play the animation when the number was updated.
+  final bool animateOnUpdate;
+
   NumberCol({
     required this.animateTo,
     required this.textStyle,
     required this.duration,
     required this.curve,
-  }) : assert(animateTo >= 0 && animateTo < 10);
+    this.animateOnUpdate = false,
+  }) : assert(animateTo == null || (animateTo >= 0 && animateTo < 10));
 
   @override
   _NumberColState createState() => _NumberColState();
@@ -37,12 +41,30 @@ class _NumberColState extends State<NumberCol>
     super.initState();
 
     WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _elementSize = _scrollController!.position.maxScrollExtent / 10;
-      setState(() {});
-
-      _scrollController!.animateTo(_elementSize * widget.animateTo,
-          duration: widget.duration, curve: widget.curve);
+      measure();
+      animate();
     });
+  }
+
+  void measure() {
+    _elementSize = _scrollController!.position.maxScrollExtent / 11;
+    setState(() {});
+  }
+
+  void animate() {
+    // index 0 is space, otherwise number - 1
+    final elementIndex = widget.animateTo != null ? (widget.animateTo! + 1) : 0;
+    _scrollController!.animateTo(_elementSize * elementIndex,
+        duration: widget.duration, curve: widget.curve);
+  }
+
+  @override
+  void didUpdateWidget(covariant NumberCol oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.animateOnUpdate && widget.animateTo != oldWidget.animateTo) {
+      animate();
+    }
   }
 
   @override
@@ -53,9 +75,11 @@ class _NumberColState extends State<NumberCol>
         child: SingleChildScrollView(
           controller: _scrollController,
           child: Column(
-            children: List.generate(10, (position) {
-              return Text(position.toString(), style: widget.textStyle);
-            }),
+            children: [
+              Text(' ', style: widget.textStyle),
+              for (var i = 0; i < 10; i++)
+                Text(i.toString(), style: widget.textStyle)
+            ],
           ),
         ),
       ),
